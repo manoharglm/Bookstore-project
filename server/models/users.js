@@ -14,12 +14,12 @@ const userSchema = new mongoose.Schema({
 })
 const User = module.exports = mongoose.model('user', userSchema)
 
-module.exports.wantToRead = (user, callback) => {
-    User.findOne({
+module.exports.displayBooks = (user,section, callback) => {
+    User.find({
         userName: user
-    }, 'want_to_read', callback)
+    }, section, callback)
 }
-module.exports.addToWantToRead = (user, bookIsbn, callback) => {
+module.exports.addBook = (user, bookIsbn,section, callback) => {
     Book.find({
         isbn: bookIsbn
     }, (err, data) => {
@@ -28,7 +28,7 @@ module.exports.addToWantToRead = (user, bookIsbn, callback) => {
             userName: user
         }, {
             $push: {
-                want_to_read: {
+                [section]: {
                     title: data[0].title,
                     isbn: data[0].isbn
                 }
@@ -36,65 +36,16 @@ module.exports.addToWantToRead = (user, bookIsbn, callback) => {
         }, callback)
     })
 }
-module.exports.deleteFromWantToRead = (user, bookIsbn, callback) => {
-
-
+module.exports.deleteBook = (user, bookIsbn,section, callback) => {
     User.findOneAndUpdate({
         userName: user
     }, {
         $pull: {
-            want_to_read: {
+            [section]: {
                 isbn: bookIsbn
             }
         }
     }, {
         multi: true
-    }, (err, data) => {
-        console.log(data)
-    })
-    // let query ={userName: user}
-    // User.find(query, {select:{want_to_read:{isbn:bookIsbn}}} ,(err, data) => {
-    //     console.log(data)
-    // })
-    // User.findOneAndDelete(query)
+    }, callback)
 }
-
-// module.exports.addUserName = (userName, callback) => {
-//     user.create(userName, callback)
-// }
-
-
-// User.insertMany(
-//     [{
-//         'userName': 'rocky',
-//         'password': 'yoadrian',
-//         'want_to_read': [{
-//             'isbn': '9781449337711',
-//             'title': 'Designing Evolvable Web APIs with ASP.NET'
-//         }],
-//         'read': [{
-//             'isbn': '9781449325862',
-//             'title': 'Git Pocket Guide'
-//         }],
-//         'reading': [{
-//             'isbn': '9781491950296',
-//             'title': 'Programming JavaScript Applications'
-//         }]
-//     },
-//     {
-//         'userName': 'adrian',
-//         'password': 'rocky',
-//         'want_to_read': [{
-//             'isbn': '9781593277574',
-//             'title': 'Understanding ECMAScript 6'
-//         }],
-//         'read': [{
-//             'isbn': '9781491950296',
-//             'title': 'Programming JavaScript Applications'
-//         }],
-//         'reading': [{
-//             'isbn': '9781449365035',
-//             'title': 'Speaking JavaScript'
-//         }]
-//     }]
-// )

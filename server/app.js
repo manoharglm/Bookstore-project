@@ -38,22 +38,22 @@ app.get('/books/:_id', (req, res) => {
     })
 })
 
-app.get('/api/list/want-to-read', (req, res) => {
-    Users.wantToRead(req.get('Referer'), (err, books) => {
+app.get('/api/list/:section', (req, res) => {
+    Users.displayBooks(req.get('Referer'), req.params.section, (err, books) => {
         if (err) throw err
         res.send(books)
     })
 })
 
-app.post('/api/list/want-to-read', (req, res) => {
-    let ISBN = req.body
-    Users.addToWantToRead(req.get('Referer'), ISBN.isbn, (err, books) => {
+app.post('/api/list/:section', (req, res) => {
+    let obj = req.body
+    Users.addBook(req.get('Referer'), obj.isbn,req.params.section, (err, books) => {
         if (err) throw err
         res.send(books)
     })
 })
-app.get('/api/list/want-to-read/:isbn', (req, res) => {
-    Users.deleteFromWantToRead(req.get('Referer'), req.params.isbn, (err, books) => {
+app.delete('/api/list/:section/:isbn', (req, res) => {
+    Users.deleteBook(req.get('Referer'), req.params.isbn,req.params.section, (err, books) => {
         if (err) throw err
         res.send(books)
     })
