@@ -10,9 +10,15 @@ const userSchema = new mongoose.Schema({
 const User = module.exports = mongoose.model('user', userSchema)
 
 module.exports.addUser = (user, callback) => {
-    User.create({
-        userName: user
-    }, callback)
+    User.find({userName:user}).then((err,data)=>{
+        if(!data){
+            User.create({
+                userName: user
+            }, callback)        
+        }else{
+            callback(new Error('Username already exists'),null)
+        }
+    })
 }
 
 module.exports.displayBooks = (user, section, callback) => {
@@ -38,9 +44,7 @@ module.exports.addBook = (user, bookIsbn, section, callback) => {
             callback(checkIsbn)
         })
     })
-
 }
-
 module.exports.deleteBook = (user, bookIsbn, section, callback) => {
     User.findOneAndUpdate({
         userName: user
