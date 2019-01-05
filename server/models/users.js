@@ -2,41 +2,46 @@ const mongoose = require('mongoose')
 let Book = require('./books.js')
 
 const userSchema = new mongoose.Schema({
-    userName: {
-        type: String,
-        required: true,
-        unique: true
-    },
+    userName: String,
     want_to_read: [],
     read: [],
     reading: []
-
 })
 const User = module.exports = mongoose.model('user', userSchema)
 
-module.exports.displayBooks = (user,section, callback) => {
+module.exports.addUser = (user, callback) => {
+    User.create({
+        userName: user
+    }, callback)
+}
+
+module.exports.displayBooks = (user, section, callback) => {
     User.find({
         userName: user
     }, section, callback)
 }
-module.exports.addBook = (user, bookIsbn,section, callback) => {
-    Book.find({
+module.exports.addBook = (user, bookIsbn, section, callback) => {
+    Book.findOne({
         isbn: bookIsbn
-    }, (err, data) => {
-        if (err) throw err
-        User.findOneAndUpdate({
+    }).then(data => {
+        User.findOne({
             userName: user
-        }, {
-            $push: {
-                [section]: {
-                    title: data[0].title,
-                    isbn: data[0].isbn
-                }
+        }).then(bookData=>{
+            let checkIsbn = bookData[section].some(book => book.isbn ===bookIsbn)
+            if(!checkIsbn){
+                bookData[section].push({
+                    isbn:data.isbn,
+                    title:data.title
+                })
+                bookData.save()
             }
-        }, callback)
+            callback(checkIsbn)
+        })
     })
+
 }
-module.exports.deleteBook = (user, bookIsbn,section, callback) => {
+
+module.exports.deleteBook = (user, bookIsbn, section, callback) => {
     User.findOneAndUpdate({
         userName: user
     }, {

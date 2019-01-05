@@ -37,8 +37,6 @@ const booksSchema = new mongoose.Schema({
     }
 
 })
-
-
 const Book = module.exports = mongoose.model('book', booksSchema)
 
 
@@ -49,5 +47,3 @@ module.exports.getBooks = (callback) => {
 module.exports.getBookbyId = (bookId, callback) => {
     Book.findById(bookId, callback)
 }
-
-
