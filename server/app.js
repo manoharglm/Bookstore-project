@@ -24,12 +24,8 @@ app.get('/books', (req, res) => {
 //add new user
 app.post('/books', (req, res) => {
     let data = req.body
-    Users.addUser(data.userName, (err, user) => {
-        if (err){
-            res.status(400).send(err.message)
-        }else{
-            res.status(201).json(user)
-        }
+    Users.addUser(data.userName, (result, stat) => {
+        res.status(stat).send(result)
     })
 })
 //display the book of selected id
@@ -41,20 +37,15 @@ app.get('/books/:_id', (req, res) => {
 })
 //display the books belong to the section want-to-read, read, reading
 app.get('/api/list/:section', (req, res) => {
-    Users.displayBooks(req.get('Referer'), req.params.section, (err, books) => {
-        if (err) throw err
-        res.send(books)
+    Users.displayBooks(req.get('Referer'), req.params.section, (result, stat) => {
+        res.status(stat).send(result)
     })
 })
 //add books to chosen section
 app.post('/api/list/:section', (req, res) => {
     let obj=req.body
-    Users.addBook(req.get('Referer'), obj.isbn, req.params.section, (result) => {
-        if (result) {
-            res.status(400).send('Book already exists')
-        }else{
-            res.status(201).send(`Book is added to ${req.params.section} books section`)
-        }
+    Users.addBook(req.get('Referer'), obj.isbn, req.params.section, (result,stat) => {
+        res.status(stat).send(result)
     })
 })
 //delete book from chosen section
