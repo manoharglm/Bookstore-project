@@ -18,10 +18,10 @@ const joiSchema = Joi.object().keys({
 module.exports.addUser = (user, callback) => {
     let validation = Joi.validate({username: user}, joiSchema)
     if(validation.error=== null){
-        User.find({
+        User.findOne({
             userName: user
-        }).then((err, data) => {
-            if(data === undefined){
+        }).then( data => {
+            if(data === null){
                 User.create({
                     userName: user
                 }).then(data =>{
@@ -29,7 +29,7 @@ module.exports.addUser = (user, callback) => {
                 }) 
             }else callback('Username already exists', 400)
         })
-    }else callback(`Invalid Username ${user}`,400)
+    }else callback(`Invalid Username`,400)
 }
 
 module.exports.displayBooks = (user, section, callback) => {
@@ -42,7 +42,9 @@ module.exports.displayBooks = (user, section, callback) => {
         })
     }else callback('Invalid Username',400)
 }
+
 module.exports.addBook = (user, bookIsbn, section, callback) => {
+
     let validation = Joi.validate({
         username: user,
         isbn: bookIsbn
@@ -55,7 +57,17 @@ module.exports.addBook = (user, bookIsbn, section, callback) => {
             User.findOne({
                 userName: user
             }).then(bookData => {
-                let checkIsbn = bookData[section].some(book => book.isbn === bookIsbn)
+                //do the following using MongoDB Queries or promises
+                let checkIsbn = null
+                let arr = ['want_to_read','read','reading']
+                for(let i =0; i<arr.length;i++){
+                    for(let j=0;j<bookData[arr[i]].length;j++){
+                        if(bookData[arr[i]][j].isbn === bookIsbn){
+                            checkIsbn = true
+                        }
+                    }
+                }
+  
                 if (!checkIsbn) {
                     bookData[section].push({
                         isbn: data.isbn,
@@ -64,7 +76,7 @@ module.exports.addBook = (user, bookIsbn, section, callback) => {
                     bookData.save()
                     callback(bookData, 201)
                 } else {
-                    callback(`Book already exists in ${section} section`, 400)
+                    callback('Book already exists', 400)
                 }
             })
         })
@@ -74,12 +86,12 @@ module.exports.addBook = (user, bookIsbn, section, callback) => {
 }
 
 module.exports.deleteBook = (user, bookIsbn, section, callback) => {
-    let validation = Joi.validate({
+    let validation = Joi.validate({ 
         username: user,
         isbn: bookIsbn
     }, joiSchema)
     if (validation.error === null) {
-        User.findOneAndUpdate({userName: user}, {$pull: {[section]: {isbn: bookIsbn}}},{multi: true}).then(data =>{
+        User.findOneAndUpdate({userName: user}, {$pull: {[section]: {isbn: bookIsbn}}},{new:true}).then(data =>{
             callback(data,201)
         })
     }else callback('Invalid Request',400)

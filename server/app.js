@@ -2,6 +2,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 let Books = require('./models/books')
 let Users = require('./models/users')
+let path = require('path')
 const app = express()
 const bodyParser = require('body-parser')
 
@@ -50,9 +51,10 @@ app.post('/api/list/:section', (req, res) => {
 })
 //delete book from chosen section
 app.delete('/api/list/:section/:isbn', (req, res) => {
-    Users.deleteBook(req.get('Referer'), req.params.isbn, req.params.section, (err, books) => {
-        if (err) throw err
-        res.send(books)
+    Users.deleteBook(req.get('Referer'), req.params.isbn, req.params.section, (result, stat) => {
+        res.status(stat).send(result)
     })
 })
+app.use(express.static(path.join(__dirname, '../client')))
 app.listen(3000)
+
