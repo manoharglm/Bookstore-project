@@ -11,88 +11,76 @@ const userSchema = new mongoose.Schema({
 const User = module.exports = mongoose.model('user', userSchema)
 
 const joiSchema = Joi.object().keys({
-    username: Joi.string().alphanum().min(3).max(30).required(),
     isbn: Joi.number()
 })
 
-module.exports.addUser = (user, callback) => {
-    let validation = Joi.validate({username: user}, joiSchema)
-    if(validation.error=== null){
-        User.findOne({
-            userName: user
-        }).then( data => {
-            if(data === null){
-                User.create({
-                    userName: user
-                }).then(data =>{
-                    callback(data,201)
-                }) 
-            }else callback('Username already exists', 400)
+function joiValidationIsbn(bookIsbn) {
+    return (Joi.validate({isbn: bookIsbn}, joiSchema)).error
+}
+module.exports.joiValidationIsbn = joiValidationIsbn
+
+function validateUser(user) {
+    return new Promise((resolve, reject) => {
+        User.findOne({userName: user}).then(data => {
+            if (data) reject('user already registered')
+            else resolve(data)
         })
-    }else callback(`Invalid Username`,400)
+    })
 }
 
-module.exports.displayBooks = (user, section, callback) => {
-    let validation = Joi.validate({username: user}, joiSchema)
+module.exports.validateUser = validateUser
 
-    if(validation.error=== null){
-        User.find({userName: user}, section).then(data =>{
-            if(data.length===0) callback(`${user} does not exists`,400)
-            else callback(data,200)
+module.exports.addUser = (user) => {
+    return User.create({userName: user})
+        .then(data => {
+            return data
         })
-    }else callback('Invalid Username',400)
 }
 
-module.exports.addBook = (user, bookIsbn, section, callback) => {
+module.exports.displayBooks = (user, section) => {
+    return new Promise((resolve,reject) => {
+        User.find({userName: user}, section).then(data => {
+            if (data.length === 0) reject(`${user} does not exists`, 400)
+            else resolve(data, 200)
+        })
+    })
+}
 
-    let validation = Joi.validate({
-        username: user,
-        isbn: bookIsbn
-    }, joiSchema)
-
-    if (validation.error === null) {
-        Book.findOne({
-            isbn: bookIsbn
-        }).then(data => {
-            User.findOne({
-                userName: user
-            }).then(bookData => {
+function validatingRequest(user, bookIsbn) {
+    return new Promise((resolve, reject) => {
+        Book.findOne({isbn: bookIsbn}).then(
+            User.findOne({userName: user}).then(bookData => {
                 //do the following using MongoDB Queries or promises
                 let checkIsbn = null
-                let arr = ['want_to_read','read','reading']
-                for(let i =0; i<arr.length;i++){
-                    for(let j=0;j<bookData[arr[i]].length;j++){
-                        if(bookData[arr[i]][j].isbn === bookIsbn){
+                let arr = ['want_to_read', 'read', 'reading']
+                for (let i = 0; i < arr.length; i++) {
+                    for (let j = 0; j < bookData[arr[i]].length; j++) {
+                        if (bookData[arr[i]][j].isbn === bookIsbn) {
                             checkIsbn = true
                         }
                     }
                 }
-  
-                if (!checkIsbn) {
-                    bookData[section].push({
-                        isbn: data.isbn,
-                        title: data.title
-                    })
-                    bookData.save()
-                    callback(bookData, 201)
-                } else {
-                    callback('Book already exists', 400)
-                }
-            })
-        })
-    } else {
-        callback('Invalid Request',400)
-    }
+                resolve(checkIsbn)
+            }).catch(err => reject(err))
+        ).catch(err => reject(err))
+    })
+}
+module.exports.validatingRequest = validatingRequest
+
+
+module.exports.addBook = (user, bookIsbn, section) => {
+    return new Promise((resolve,reject)=>{
+        User.findOneAndUpdate({userName: user},{$push: {[section]: {isbn: bookIsbn}}}).then(data =>{
+            resolve(data)
+        }).catch(err => reject(err))
+    })
 }
 
+
 module.exports.deleteBook = (user, bookIsbn, section, callback) => {
-    let validation = Joi.validate({ 
-        username: user,
-        isbn: bookIsbn
-    }, joiSchema)
-    if (validation.error === null) {
-        User.findOneAndUpdate({userName: user}, {$pull: {[section]: {isbn: bookIsbn}}},{new:true}).then(data =>{
-            callback(data,201)
-        })
-    }else callback('Invalid Request',400)
+    return new Promise((resolve,reject) =>{
+        User.findOneAndUpdate({userName: user}, {$pull: {[section]: {isbn: bookIsbn}}},{new: true}).then(data => {
+            resolve(data)
+        }).catch((err) => reject(err))
+    })
 }

@@ -19,10 +19,19 @@ const booksSchema = new mongoose.Schema({
 })
 const Book = module.exports = mongoose.model('book', booksSchema)
 
-module.exports.getBooks = (callback) => {
-    Book.find(callback)
+module.exports.getBooks = () => {
+    return new Promise((resolve,reject) =>{
+        Book.find({}).then(data =>{
+            resolve(data) 
+        })
+    })
 }
-
-module.exports.getBookbyId = (bookId, callback) => {
-    Book.findById(bookId, callback)
+module.exports.getBookbyId = (bookId) => {
+    return new Promise((resolve,reject) =>{
+        Book.findById(bookId).then(data =>{
+            resolve(data) 
+        }).catch((err) => {
+            reject(err)
+        })
+    })
 }
