@@ -40,8 +40,8 @@ module.exports.addUser = (user) => {
 module.exports.displayBooks = (user, section) => {
     return new Promise((resolve,reject) => {
         User.find({userName: user}, section).then(data => {
-            if (data.length === 0) reject(`${user} does not exists`, 400)
-            else resolve(data, 200)
+            if (data.length === 0) reject(JSON.stringify(`${user} does not exists`))
+            else resolve(JSON.stringify(data))
         })
     })
 }

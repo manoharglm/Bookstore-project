@@ -27,7 +27,7 @@ app.use('/api/list', function (req, res, next) {
     }, joiSchema)
     if (validation.error === null) {
         next()
-    } else res.send(`Invalid username ${req.get('Referer')}`)
+    } else res.send(JSON.stringify(`Invalid username ${req.get('Referer')}`))
 })
 
 //index page
