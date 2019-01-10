@@ -45,3 +45,7 @@ img{
 /* .bookstore-section-books div{
     display: flex
 } */
+/* .bookstore-section-select{
+    flex-direction: column; 
+    justify-self: flex-end; 
+} */

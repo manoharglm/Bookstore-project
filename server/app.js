@@ -27,32 +27,39 @@ app.use('/api/list', function (req, res, next) {
     }, joiSchema)
     if (validation.error === null) {
         next()
-    } else res.send(JSON.stringify(`Invalid username ${req.get('Referer')}`))
+    } else res.status(400).send(JSON.stringify(`Invalid username ${req.get('Referer')}`))
 })
-
+app.use('/api/register', function (req, res, next) {
+    let validation = Joi.validate({
+        username: req.body.userName
+    }, joiSchema)
+    if (validation.error === null) {
+        next()
+    } else res.status(400).send(JSON.stringify(`Invalid username ${req.get('Referer')}`))
+})
 
 //Display books
 app.get('/api/books', (req, res) => {
     Books.getBooks().then(data =>{
-        res.json(data)
+        res.status(200).json(data)
     }) 
 })
 //display the book of selected id
 app.get('/api/books/:_id', (req, res) => {
     Books.getBookbyId(req.params._id).then(data => {
-        res.send(data)
+        res.status(200).send(data)
     }).catch((err) =>{
-        res.send(err.message)
+        res.status(400).send(err.message)
     })
 })
 //validate and add new user
 app.post('/api/register', (req, res) => {
     let user = req.body
-    Users.validateUser(user.userName).then(
+    Users.validateUser(user.userName).then(()=>{
         Users.addUser(user.userName).then(result => {
             res.status(201).send(result)
         })
-    ).catch(err => {
+    }).catch((err)=>{
         res.status(400).send(err)
     })
 })
@@ -60,7 +67,7 @@ app.post('/api/register', (req, res) => {
 //display the books belong to the section want-to-read, read, reading
 app.get('/api/list/:section', (req, res) => {
     Users.displayBooks(req.get('Referer'), req.params.section).then(data =>{
-        res.status(201).send(data)
+        res.status(200).send(data)
     }).catch((err) =>{
         res.status(400).send(err)
     })
@@ -75,13 +82,13 @@ app.post('/api/list/:section', (req, res) => {
             }).then(data => {
                 if(!data){
                     Users.addBook(req.get('Referer'), obj.isbn, req.params.section).then(books =>{
-                        res.send(books)
+                        res.status(200).send(books)
                     }).catch((err) => res.send(err))
                 }else{
-                    res.send('Book already exists')
+                    res.status(400).send('Book already exists')
                 }
             }).catch(err => {
-                res.send(err)
+                res.status(400).send(err)
             })
     }else res.status(400).send('Invalid request')
 
@@ -90,7 +97,7 @@ app.post('/api/list/:section', (req, res) => {
 app.delete('/api/list/:section/:isbn', (req, res) => {
     Users.deleteBook(req.get('Referer'), req.params.isbn, req.params.section).then(data => {
         res.status(200).send(data)
-    }).catch(err => res.send(err))
+    }).catch(err => res.status(400).send(err))
 })
 app.use(express.static(path.join(__dirname, '../client')))
 app.listen(3000)

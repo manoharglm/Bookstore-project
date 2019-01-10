@@ -23,7 +23,7 @@ function validateUser(user) {
     return new Promise((resolve, reject) => {
         User.findOne({userName: user}).then(data => {
             if (data) reject('user already registered')
-            else resolve(data)
+            else resolve(true)
         })
     })
 }
@@ -67,7 +67,6 @@ function validatingRequest(user, bookIsbn) {
 }
 module.exports.validatingRequest = validatingRequest
 
-
 module.exports.addBook = (user, bookIsbn, section) => {
     return new Promise((resolve,reject)=>{
         User.findOneAndUpdate({userName: user},{$push: {[section]: {isbn: bookIsbn}}}).then(data =>{
@@ -75,9 +74,7 @@ module.exports.addBook = (user, bookIsbn, section) => {
         }).catch(err => reject(err))
     })
 }
-
-
-module.exports.deleteBook = (user, bookIsbn, section, callback) => {
+module.exports.deleteBook = (user, bookIsbn, section) => {
     return new Promise((resolve,reject) =>{
         User.findOneAndUpdate({userName: user}, {$pull: {[section]: {isbn: bookIsbn}}},{new: true}).then(data => {
             resolve(data)
