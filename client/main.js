@@ -1,9 +1,11 @@
-// document.addEventListener("DOMContentLoaded", function () {
+
 async function onclickGetBooks() {
     await getUserDataBySection("want_to_read")
     await getUserDataBySection("read")
     await getUserDataBySection("reading")
 }
+
+
 function displayBooks(username) {
     fetch('/api/books', {
             method: 'GET'
@@ -36,15 +38,9 @@ function getUserDataBySection(section) {
             },
         })
         .then(response => {
-            if(section === 'want_to_read'){
-                if(response.status !== 200){
-                    alert('Invalid username, Please Register')
-                }else{
-                    displayBooks(username)
-                }
-            }
             return response.json()
-        }).then((data) => {
+        })
+        .then((data) => {
             let arr = []
             data[0][section].forEach(element => {
                 arr.push(element.isbn)
@@ -54,6 +50,9 @@ function getUserDataBySection(section) {
             })
         })
 }
+
+
+
 
 function fetchTitleAndImage(data, booksArr, section,username) {
     $('.bookstore-section-books').append(`<h3>${section}</h3>`)
@@ -78,7 +77,10 @@ function deleteBookFromSection(section,bookIsbn,username){
             "referrer": username,
         }
     })
-    .then(response => response.json()).then(data => alert(` book deleted from ${section} section succesfully`))
+    .then(response => response.json()).then(() =>{
+        // onclickGetBooks()
+        alert(` book deleted from ${section} section succesfully`)
+    })
 }
 
 
@@ -94,7 +96,10 @@ function addToSection(bookIsbn,section,username){
         },
         body: JSON.stringify(data)
     })
-    .then(response => response.json()).then(data => alert(` book add to ${section} section succesfully`))
+    .then(response => response.json()).then(() =>{
+        onclickGetBooks()
+        alert(` book add to ${section} section succesfully`)
+    })
 }
 
 function getBooks() {
@@ -119,3 +124,22 @@ function onRegisterCreateNewUser() {
         .then(response => response.json()).then(data => alert(`${data.userName} Succesfully Registered, Please click Login`))
 }
 
+function getBooksData(){
+    let username = document.getElementById('login-input').value
+    fetch(`/api/list/read`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "referrer": username,
+        },
+    })
+    .then(response => {
+        if(response.status !== 200){
+            alert('Invalid Username')
+        }else{
+            displayBooks(username)
+        }
+    })
+
+    // displayBooks(username)
+}
