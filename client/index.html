@@ -3,14 +3,27 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Book Stroe</title>
+    <title>Welcome to BookStore</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
     <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
     <script src="main.js"></script>
 </head>
 <body>
-    <div id="container">
-        
+    <div class="bookstore-title">
+        <span>Book Store</span>
     </div>
+    <form class='bookstore-login' onsubmit="return false">
+      <input type="text" id="login-input">
+      <button class="bookstore-login-button" onclick="getUserDataBySection();">Login</button>
+    </form>
+    <div class="bookstore">
+      <div class="bookstore-books">
+      </div>
+      <div class="bookstore-section-books">
+      </div>
+    </div>
+
 </body>
 </html>

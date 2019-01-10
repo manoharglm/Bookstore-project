@@ -1,0 +1,47 @@
+/* html {
+    background: url('https://images.wallpaperscraft.com/image/cup_book_reading_114848_1920x1080.jpg') bottom center;
+} */
+body{
+    padding: 0;
+    border:0;
+    margin:0;
+}
+.bookstore-title{
+    text-align: center;
+    top: 0;
+    background-color: black;
+    color: green;
+}
+.bookstore-title span{
+    font-size: 2em;
+    font-weight: 500;
+    font-family: 'Lobster', cursive;
+    padding:50% 0%;
+}
+
+.bookstore-books{
+    display: grid;
+    grid-template-columns: auto auto auto;
+}
+.bookstore-books div{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+img{
+    width: auto;
+    height: 250px;
+    padding: 10%;
+}
+.bookstore-books p{
+    text-align: center;
+}
+/* .bookstore-want_to_read-books{
+    color: red
+} */
+
+.bookstore{
+    display: grid;
+    grid-template-columns: auto auto
+}

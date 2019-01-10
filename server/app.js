@@ -30,10 +30,7 @@ app.use('/api/list', function (req, res, next) {
     } else res.send(JSON.stringify(`Invalid username ${req.get('Referer')}`))
 })
 
-//index page
-app.get('/', (req, res) => {
-    res.send('Hello append "/api/books" at the end of url')
-})
+
 //Display books
 app.get('/api/books', (req, res) => {
     Books.getBooks().then(data =>{
