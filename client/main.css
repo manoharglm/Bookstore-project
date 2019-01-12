@@ -1,47 +1,106 @@
-/* html {
-    background: url('https://images.wallpaperscraft.com/image/cup_book_reading_114848_1920x1080.jpg') bottom center;
-} */
-body{
-    padding: 0;
-    border:0;
-    margin:0;
-}
-.bookstore-title{
-    text-align: center;
-    top: 0;
-    background-color: black;
-    color: green;
-}
-.bookstore-title span{
-    font-size: 2em;
-    font-weight: 500;
-    font-family: 'Lobster', cursive;
-    padding:50% 0%;
+html,
+body {
+    width: 100%;
+    height: 100%;
 }
 
-.bookstore-books{
+body {
+    padding: 0;
+    border: 0;
+    margin: 0;
+    background-image: url(./resources/bg.jpg);
+    background-color: rgba(0, 0, 0, 0.4);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    height: 100%;
+    width: auto;
+}
+
+/* .backgroung-image {
+    width: 100%;
+    height: 100%;
+    min-width: 100%;
+    min-height: 100%;
+    position: relative;
+} */
+/* .bookstore{
+    position: absolute;
+} */
+.bookstore-title {
+    text-align: center;
+    top: 0;
+    background-color: #f91313;
+    color: #fdea2c;
+}
+
+
+@font-face {
+    font-family: 'Harry Potter';
+    src: url('http://www.fontsaddict.com/fontface/harry-potter.TTF');
+  }
+
+.bookstore-title span {
+    font-size: 2em;
+    font-weight: 500;
+    font-family: 'Harry Potter', cursive;
+    padding: 50% 0%;
+}
+
+.bookstore-books
+
+/* , .bookstore-want_to_read-books,.bookstore-read-books,.bookstore-reading-books */
+    {
     display: grid;
     grid-template-columns: auto auto auto;
 }
-.bookstore-books div,.bookstore-section-books div{
+
+.bookstore-books div,
+.bookstore-want_to_read-section,
+.bookstore-read-section,
+.bookstore-reading-section {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-img{
-    width: auto;
-    height: 250px;
-    padding: 10%;
+.bookstore-search-result img,.bookstore img{
+    width: 150px;
+    height: 200px;
+    padding: 3%;
+    background-color: white;
+    border-radius: 4%;
 }
-.bookstore-books p{
+/* div {
+    width: 200px;
+    height: 200px;
+    display: block;
+    position: relative;
+  }
+  
+  div::after {
+    content: "";
+    background: url(image.jpg);
+    opacity: 0.5;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    position: absolute;
+    z-index: -1;   
+  } */
+
+.bookstore-books p {
     text-align: center;
 }
-.bookstore{
+
+.bookstore {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-column-gap: 100px;
 }
+
 /* .bookstore-section-books div{
     display: flex
 } */
@@ -49,3 +108,53 @@ img{
     flex-direction: column; 
     justify-self: flex-end; 
 } */
+
+.bookstore-section-books {
+    visibility: hidden;
+}
+
+#bookstore-logout-search {
+    visibility: hidden;
+
+}
+
+#bookstore-login {
+    display: block;
+    display: flex;
+    justify-content: center;
+    margin-top: 10%;
+}
+
+#bookstore-logout-search {
+    display: block;
+    display: flex;
+    justify-content: center;
+    margin-top: 2%;
+}
+
+#bookstore-logout-search button,
+#bookstore-login button {
+    background-color: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+#bookstore-login input {
+    height: 2.5em;
+    width: 50%;
+}
+
+#bookstore-logout-search input {
+    height: 2.5em;
+    width: 50%;
+}
+
+/* .bookstore-section-books{
+    display: grid
+} */
+.bookstore-want_to_read-books,
+.bookstore-read-books,
+.bookstore-reading-books,
+.bookstore-search-result {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}

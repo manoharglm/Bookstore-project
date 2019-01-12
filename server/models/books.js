@@ -20,7 +20,7 @@ const booksSchema = new mongoose.Schema({
 const Book = module.exports = mongoose.model('book', booksSchema)
 
 module.exports.getBooks = () => {
-    return new Promise((resolve,reject) =>{
+    return new Promise((resolve) =>{
         Book.find({}).then(data =>{
             resolve(data) 
         })

@@ -1,32 +1,59 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Welcome to BookStore</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.3.0/fuse.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
+    <link href="http://www.fontsaddict.com/font/harry-potter&text=&size=60&fg_color=000000&bg_color=ffffff" rel="stylesheet">
     <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
     <!-- <link rel="icon" href="resources/shop.png"> -->
     <link rel="stylesheet" href="">
     <script src="main.js"></script>
+
+
 </head>
+
 <body>
-    <div class="bookstore-title">
-        <span>Book Store</span>
-    </div>
-    <form class='bookstore-login' onsubmit="return false">
-      <input type="text" id="login-input" value="manohar">
-      <button class="bookstore-login-button" onclick="onclickGetBooks();getBooksData();">Login</button>
-      <button class="bookstore-login-button"  onclick="onRegisterCreateNewUser();">Register</button>
-    </form>
-    <div class="bookstore">
-      <div class="bookstore-books">
-      </div>
-      <div class="bookstore-section-books">
-      </div>
-    </div>
+    <!-- <img class="backgroung-image" src="./resources/bg.jpg"> -->
+    <!-- <div class="bookstore"> -->
+        <div class="bookstore-title">
+            <span>Book Store</span>
+        </div>
+        <form id='bookstore-login' onsubmit="return false">
+            <input type="text" id="login-input" value="manohar">
+            <button class="bookstore-login-button" onclick="onclickGetBooks();getBooksData();showDiv();">Login</button>
+            <button class="bookstore-register-button" onclick="onRegisterCreateNewUser();">Register</button>
+        </form>
+        <form id='bookstore-logout-search' onsubmit="return false">
+            <input type="search" id="search-input" value="Javascript">
+            <button onclick="onclickSearch();">Search</button>
+            <button class="bookstore-logout-button" onclick="window.location.reload()">Logout</button>
+        </form>
+        <div class="bookstore-search-result">
+
+        </div>
+        <div class="bookstore">
+            <div class="bookstore-books">
+            </div>
+            <div class="bookstore-section-books" id="bookstore-section-books-id">
+                <p>Want to read</p>
+                <div class="bookstore-want_to_read-books">
+                </div>
+                <p>Read</p>
+                <div class="bookstore-read-books">
+                </div>
+                <p>Reading</p>
+                <div class="bookstore-reading-books">
+                </div>
+            </div>
+        </div>
+    <!-- </div> -->
 
 </body>
+
 </html>
