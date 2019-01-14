@@ -29,6 +29,8 @@ app.use('/api/list', function (req, res, next) {
         next()
     } else res.status(400).send(JSON.stringify(`Invalid username ${req.get('Referer')}`))
 })
+
+
 app.use('/api/register', function (req, res, next) {
     let validation = Joi.validate({
         username: req.body.userName
@@ -37,6 +39,7 @@ app.use('/api/register', function (req, res, next) {
         next()
     } else res.status(400).send(JSON.stringify(`Invalid username ${req.get('Referer')}`))
 })
+
 
 //Display books
 app.get('/api/books', (req, res) => {
@@ -56,11 +59,11 @@ app.get('/api/books/:_id', (req, res) => {
 app.post('/api/register', (req, res) => {
     let user = req.body
     Users.validateUser(user.userName).then(() => {
-        Users.addUser(user.userName).then(result => {
-            res.status(201).send(result)
-        })
+        return Users.addUser(user.userName)
+    }).then(result => {
+        res.status(201).send(result)
     }).catch((err) => {
-        res.status(400).send(err)
+        res.status(409).send(err)
     })
 })
 
@@ -77,9 +80,6 @@ app.post('/api/list/:section', (req, res) => {
     let obj = req.body
     if (Users.joiValidationIsbn(obj.isbn).error === null) {
         Users.validatingRequest(req.get('Referer'), obj.isbn, req.params.section)
-            // .then(() => {
-            //     return Users.checkInOtherSectionToRemove(req.get('Referer'), req.params.section, obj.isbn)
-            // })
             .then(() => {
                 return Users.addBook(req.get('Referer'), obj.isbn, req.params.section)
             })
