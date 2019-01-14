@@ -40,58 +40,56 @@ app.use('/api/register', function (req, res, next) {
 
 //Display books
 app.get('/api/books', (req, res) => {
-    Books.getBooks().then(data =>{
+    Books.getBooks().then(data => {
         res.status(200).json(data)
-    }) 
+    })
 })
 //display the book of selected id
 app.get('/api/books/:_id', (req, res) => {
     Books.getBookbyId(req.params._id).then(data => {
         res.status(200).send(data)
-    }).catch((err) =>{
+    }).catch((err) => {
         res.status(400).send(err.message)
     })
 })
 //validate and add new user
 app.post('/api/register', (req, res) => {
     let user = req.body
-    Users.validateUser(user.userName).then(()=>{
+    Users.validateUser(user.userName).then(() => {
         Users.addUser(user.userName).then(result => {
             res.status(201).send(result)
         })
-    }).catch((err)=>{
+    }).catch((err) => {
         res.status(400).send(err)
     })
 })
 
 //display the books belong to the section want-to-read, read, reading
 app.get('/api/list/:section', (req, res) => {
-    Users.displayBooks(req.get('Referer'), req.params.section).then(data =>{
+    Users.displayBooks(req.get('Referer'), req.params.section).then(data => {
         res.status(200).send(data)
-    }).catch((err) =>{
+    }).catch((err) => {
         res.status(400).send(err)
     })
 })
 //add books to chosen section
 app.post('/api/list/:section', (req, res) => {
     let obj = req.body
-    if (!Users.joiValidationIsbn(obj.isbn)){
-        Users.validatingRequest(req.get('Referer'), obj.isbn)
-            .then((data) =>{
-                return data
-            }).then(data => {
-                if(!data){
-                    Users.addBook(req.get('Referer'), obj.isbn, req.params.section).then(books =>{
-                        res.status(200).send(books)
-                    }).catch((err) => res.send(err))
-                }else{
-                    res.status(400).send('Book already exists')
-                }
-            }).catch(err => {
+    if (Users.joiValidationIsbn(obj.isbn).error === null) {
+        Users.validatingRequest(req.get('Referer'), obj.isbn, req.params.section)
+            // .then(() => {
+            //     return Users.checkInOtherSectionToRemove(req.get('Referer'), req.params.section, obj.isbn)
+            // })
+            .then(() => {
+                return Users.addBook(req.get('Referer'), obj.isbn, req.params.section)
+            })
+            .then(books => {
+                res.status(200).send(books)
+            })
+            .catch(err => {
                 res.status(400).send(err)
             })
-    }else res.status(400).send('Invalid request')
-
+    } else res.status(400).send('Invalid request')
 })
 //delete book from chosen section
 app.delete('/api/list/:section/:isbn', (req, res) => {

@@ -15,13 +15,17 @@ const joiSchema = Joi.object().keys({
 })
 
 function joiValidationIsbn(bookIsbn) {
-    return (Joi.validate({isbn: bookIsbn}, joiSchema)).error
+    return (Joi.validate({
+        isbn: bookIsbn
+    }, joiSchema))
 }
 module.exports.joiValidationIsbn = joiValidationIsbn
 
 function validateUser(user) {
     return new Promise((resolve, reject) => {
-        User.findOne({userName: user}).then(data => {
+        User.findOne({
+            userName: user
+        }).then(data => {
             if (data) reject('user already registered')
             else resolve(true)
         })
@@ -31,53 +35,117 @@ function validateUser(user) {
 module.exports.validateUser = validateUser
 
 module.exports.addUser = (user) => {
-    return User.create({userName: user})
-        .then(data => {
-            return data
-        })
+    return User.create({
+        userName: user
+    }).then(data => {
+        return data
+    })
 }
 
 module.exports.displayBooks = (user, section) => {
-    return new Promise((resolve,reject) => {
-        User.find({userName: user}, section).then(data => {
+    return new Promise((resolve, reject) => {
+        User.find({
+            userName: user
+        }, section).then(data => {
             if (data.length === 0) reject(JSON.stringify(`${user} does not exists`))
             else resolve(JSON.stringify(data))
         })
     })
 }
 
-function validatingRequest(user, bookIsbn) {
+function checkInCurrentSectionToAdd(user, section, bookIsbn) {
+    return User.findOne({
+        userName: user
+    }, section).then(bookData => {
+        let result = bookData[section].some(obj => obj.isbn === bookIsbn)
+        return result
+    })
+}
+
+// function checkInOtherSectionToRemove(user, section, bookIsbn) {
+//     let arr = ['want_to_read', 'read', 'reading']
+//     for (let i = 0; i < arr.length; i++) {
+//         if(arr[i] === section) continue
+//         else{
+//             console.log(arr[i])
+
+//             return User.findOne({
+//                 userName: user
+//             }, arr[i]).then(bookData => {
+//                 let verResult = bookData[arr[i]].some(obj => obj.isbn === bookIsbn)
+//                 if(verResult){
+//                     User.findOneAndUpdate({
+//                         userName: user
+//                     }, {
+//                         $pull: {
+//                             [section]: {
+//                                 isbn: bookIsbn
+//                             }
+//                         }
+//                     }, {
+//                         new: true
+//                     })
+//                 }
+//             })
+//         }
+//     }
+// }
+// module.exports.checkInOtherSectionToRemove = checkInOtherSectionToRemove
+
+function validatingRequest(user, bookIsbn, section) {
     return new Promise((resolve, reject) => {
-        Book.findOne({isbn: bookIsbn}).then(
-            User.findOne({userName: user}).then(bookData => {
-                //do the following using MongoDB Queries or promises
-                let checkIsbn = null
-                let arr = ['want_to_read', 'read', 'reading']
-                for (let i = 0; i < arr.length; i++) {
-                    for (let j = 0; j < bookData[arr[i]].length; j++) {
-                        if (bookData[arr[i]][j].isbn === bookIsbn) {
-                            checkIsbn = true
-                        }
+        Book.findOne({
+            isbn: bookIsbn
+        }).then(data => {
+            if (data !== null) {
+                checkInCurrentSectionToAdd(user, section, bookIsbn).then(result => {
+                    if (!result) {
+                        resolve(bookIsbn)
+                    } else {
+                        reject('Book Already Exists')
                     }
-                }
-                resolve(checkIsbn)
-            }).catch(err => reject(err))
-        ).catch(err => reject(err))
+
+                })
+
+            } else {
+                reject('Invalid Book')
+            }
+        })
     })
 }
 module.exports.validatingRequest = validatingRequest
 
 module.exports.addBook = (user, bookIsbn, section) => {
-    return new Promise((resolve,reject)=>{
-        User.findOneAndUpdate({userName: user},{$push: {[section]: {isbn: bookIsbn}}}).then(data =>{
+    return new Promise((resolve, reject) => {
+        User.findOneAndUpdate({
+            userName: user
+        }, {
+            $push: {
+                [section]: {
+                    isbn: bookIsbn
+                }
+            }
+        }).then(data => {
             resolve(data)
         }).catch(err => reject(err))
     })
 }
-module.exports.deleteBook = (user, bookIsbn, section) => {
-    return new Promise((resolve,reject) =>{
-        User.findOneAndUpdate({userName: user}, {$pull: {[section]: {isbn: bookIsbn}}},{new: true}).then(data => {
+
+function deleteBook(user, bookIsbn, section) {
+    return new Promise((resolve, reject) => {
+        User.findOneAndUpdate({
+            userName: user
+        }, {
+            $pull: {
+                [section]: {
+                    isbn: bookIsbn
+                }
+            }
+        }, {
+            new: true
+        }).then(data => {
             resolve(data)
         }).catch((err) => reject(err))
     })
 }
+module.exports.deleteBook = deleteBook

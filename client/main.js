@@ -3,8 +3,8 @@ fetch('/api/books', {
     method: 'GET'
 }).then((response) => {
     return response.json()
-}).then(data => {
-    booksData = data
+}).then(books => {
+    booksData = books
 })
 
 async function onclickGetBooks() {
@@ -17,6 +17,7 @@ function showDiv() {
     document.getElementById('bookstore-section-books-id').style.visibility = "visible";
     document.getElementById('bookstore-login').style.display = "none";
     document.getElementById('bookstore-logout-search').style.visibility = "visible";
+    document.body.style.overflowY = "unset";
 }
 
 function displayBooks(username) {
@@ -25,16 +26,23 @@ function displayBooks(username) {
         }).then((response) => {
             return response.json()
         })
-        .then(data => {
-            data.forEach(element => {
+        .then(books => {
+            showDiv() //Displays Hidden files after verification is done
+            books.forEach(book => {
                 $('.bookstore-books').append(
                     `<div>
-                            <img src="${element.cover}">
-                            <p>${element.title}</p>
-                            <div id="${element.isbn}" class="bookstore-section-select">
-                                <button onclick='addToSection("${element.isbn}","want_to_read","${username}");' >want_to_read</button>
-                                <button onclick='addToSection("${element.isbn}","read","${username}");' >Read</button>
-                                <button onclick='addToSection("${element.isbn}","reading","${username}");' >Reading</button>
+                            <img src="${book.cover}">
+                            <p>${book.title}</p>
+                            <div id="${book.isbn}" class="bookstore-section-select">
+                                <button onclick='addToSection("${book.isbn}","want_to_read","${username}");' >
+                                    want_to_read
+                                </button>
+                                <button onclick='addToSection("${book.isbn}","read","${username}");' >
+                                    Read
+                                </button>
+                                <button onclick='addToSection("${book.isbn}","reading","${username}");' >
+                                    Reading
+                                </button>
                             </div>
                         </div>`)
             });
@@ -43,7 +51,7 @@ function displayBooks(username) {
 
 function getUserDataBySection(section) {
     let username = document.getElementById('login-input').value
-    let sectionISBNs = [];
+    // let sectionISBNs = [];
     fetch(`/api/list/${section}`, {
             method: "GET",
             headers: {
@@ -54,41 +62,43 @@ function getUserDataBySection(section) {
         .then(response => {
             return response.json()
         })
-        .then((data) => {
-            let arr = []
-            data[0][section].forEach(element => {
-                arr.push(element.isbn)
+        .then((sectionISBNs) => {
+            let arrISBNs = []
+            sectionISBNs[0][section].forEach(element => {
+                arrISBNs.push(element.isbn)
             })
-            getBooks().then((data) => {
-                fetchTitleAndImage(data, arr, section,username)
+            getBooks().then((books) => {
+                fetchTitleAndImage(books, arrISBNs, section, username)
             })
         })
 
-        // .then((sectionBooks) => {
-        //     sectionISBNs = sectionBooks.map(b => b.isbn);
-        //     return sectionISBNs;
-        // })
-        // .then(() => {
-        //     return getBooks()
-        // })
-        // .then(allBooks => {
-        //     fetchTitleAndImage(allBooks, sectionISBNs, section, username)
-        // })
+    // .then((sectionBooks) => {
+    //     sectionISBNs = sectionBooks.map(b => b.isbn);
+    //     return sectionISBNs;
+    // })
+    // .then(() => {
+    //     return getBooks()
+    // })
+    // .then(allBooks => {
+    //     fetchTitleAndImage(allBooks, sectionISBNs, section, username)
+    // })
 }
 
-function fetchTitleAndImage(data, booksArr, section, username) {
+function fetchTitleAndImage(books, booksArr, section, username) {
     $(`.bookstore-${section}-section`).remove()
     // $(`.section-header`).remove()
     // $('.bookstore-section-books').append(`<h3 class='section-header'>${section}</h3>`)
-    // let sectionBooks = data.filter(book => booksArr.includes(book.isbn))
+    // let sectionBooks = books.filter(book => booksArr.includes(book.isbn))
     // let sectionBooksHTML = sectionBooks.map(book => )
-    for (let i = 0; i < data.length; i++) {
-        if (booksArr.includes(data[i].isbn)) {
+    for (let i = 0; i < books.length; i++) {
+        if (booksArr.includes(books[i].isbn)) {
             $(`.bookstore-${section}-books`).append(
                 `<div class="bookstore-${section}-section" >
-                    <img src="${data[i].cover}">
-                    <p>${data[i].title}</p>
-                    <button onclick='deleteBookFromSection("${section}","${data[i].isbn}","${username}")' >Delete</button>
+                    <img src="${books[i].cover}">
+                    <p>${books[i].title}</p>
+                    <button onclick='deleteBookFromSection("${section}","${books[i].isbn}","${username}")' >
+                        Delete
+                    </button>
                 </div>`)
         }
     }
@@ -109,25 +119,58 @@ function deleteBookFromSection(section, bookIsbn, username) {
 
 
 function addToSection(bookIsbn, section, username) {
-    let data = {
+    let isbnObj = {
         isbn: bookIsbn
     }
-    fetch(`/api/list/${section}`, {
-            method: "POST",
+
+
+        let arr = ['want_to_read', 'read', 'reading']
+        for (let i = 0; i < arr.length; i++) {
+            if(arr[i] === section){
+                fetch(`/api/list/${section}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "referrer": username,
+                    },
+                    body: JSON.stringify(isbnObj)
+                }).then(response => {
+                    if (response.status === 400) {
+                        // alert(` book already Exists`)
+                    } else {
+                        onclickGetBooks()
+                        // alert(` book add to ${section} section succesfully`)
+                    }
+                })
+            }
+            else{
+                fetch(`/api/list/${arr[i]}/${bookIsbn}`, {
+                    method: "DELETE",
+                    headers: {
+                        "referrer": username,
+                    }
+                }).then(response => {
+                    if (response.status === 400) {
+                        // alert(` book already Exists`)
+                    } else {
+                        onclickGetBooks()
+                        // alert(` book add to ${section} section succesfully`)
+                    }
+                })
+            }
+        }
+    fetch(`/api/list/${section}/${bookIsbn}`, {
+            method: "DELETE",
             headers: {
-                "Content-Type": "application/json",
                 "referrer": username,
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => {
-            if (response.status === 400) {
-                alert(` book already Exists`)
-            } else {
-                onclickGetBooks()
-                // alert(` book add to ${section} section succesfully`)
             }
         })
+        .then(response => response.json()).then(() => {
+            onclickGetBooks()
+            // alert(` book deleted from ${section} section succesfully`)
+        })
+
+
 }
 
 function getBooks() {
@@ -139,7 +182,7 @@ function getBooks() {
 }
 
 function onRegisterCreateNewUser() {
-    let data = {
+    let userObj = {
         userName: document.getElementById('login-input').value
     }
     fetch(`/api/register`, {
@@ -147,10 +190,19 @@ function onRegisterCreateNewUser() {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(userObj)
         })
-        .then(response => response.json())
-        .then(data => alert(`${data.userName} Succesfully Registered, Please click Login`))
+        .then(response => {
+            if (response.status === 400) {
+                alert('Invalid username')
+            } else {
+                response.json()
+            }
+        })
+        .then(_ => {
+            onclickGetBooks()
+            getBooksData()
+        })
 }
 
 function getBooksData() {
@@ -173,35 +225,20 @@ function getBooksData() {
 
 function fuseSearch() {
     let searchText = document.getElementById('search-input').value
-    return new Promise((res, rej) => {
-        let options = {
-            keys: ['title']
-        }
-        let fuse = new Fuse(booksData, options)
-        let result = fuse.search(searchText)
-        if (result.length === 0) {
-            alert(`No such books ${searchText}`)
-        } else {
-            for (let i = 0; i < result.length; i++) {
-                $(`.bookstore-search-result`).append(
-                    `<div>
+    $('.bookstore-search-result').empty()
+    let options = {
+        keys: ['title'],
+        threshold: 0.3,
+
+    }
+    let fuse = new Fuse(booksData, options)
+    let result = fuse.search(searchText)
+    for (let i = 0; i < result.length; i++) {
+        $(`.bookstore-search-result`).append(
+            `<div>
                         <img src="${result[i].cover}">
                         <p>${result[i].title}</p>
                     </div>`)
-            }
-        }
-        res(true)
-    })
-
-}
-
-function deleteSearch() {
-    return new Promise((res, rej) => {
-        $('.bookstore-search-result').empty()
-        res(true)
-    })
-}
-async function onclickSearch() {
-    await deleteSearch()
-    await fuseSearch()
+    }
+    res(true)
 }
