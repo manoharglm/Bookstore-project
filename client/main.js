@@ -1,3 +1,4 @@
+let username = null
 let booksData = null
 fetch('/api/books', {
     method: 'GET'
@@ -8,9 +9,9 @@ fetch('/api/books', {
 })
 
 async function onclickGetBooks() {
-    await getUserDataBySection("want_to_read")
-    await getUserDataBySection("read")
-    await getUserDataBySection("reading")
+   let want_to_read = await getUserDataBySection("want_to_read")
+   let read = await getUserDataBySection("read")
+   let reading = await getUserDataBySection("reading")
 }
 
 function showDiv() {
@@ -31,27 +32,52 @@ function displayBooks(username) {
             books.forEach(book => {
                 $('.bookstore-books').append(
                     `<div>
-                            <img src="${book.cover}">
-                            <p>${book.title}</p>
-                            <div id="${book.isbn}" class="bookstore-section-select">
-                                <button onclick='addToSection("${book.isbn}","want_to_read","${username}");' >
-                                    want_to_read
-                                </button>
-                                <button onclick='addToSection("${book.isbn}","read","${username}");' >
-                                    Read
-                                </button>
-                                <button onclick='addToSection("${book.isbn}","reading","${username}");' >
-                                    Reading
-                                </button>
-                            </div>
-                        </div>`)
-            });
+                        <img src="${book.cover}">
+                        <p>${book.title}</p>
+                        <div class="bookstore-section-select">
+                            <button id="button-want_to_read-${book.isbn}" 
+                                    class="add-book-button" 
+                                    data-isbn="${book.isbn}" 
+                                    data-user="${username}" 
+                                    data-section="want_to_read" 
+                                >
+                                want_to_read
+                            </button>
+                            <button id="button-read-${book.isbn}" 
+                                    data-isbn="${book.isbn}" 
+                                    class="add-book-button" 
+                                    data-user="${username}" 
+                                    data-section="read" 
+                                >                                
+                                Read
+                            </button>
+                            <button id="button-reading-${book.isbn}" 
+                                    data-isbn="${book.isbn}" 
+                                    class="add-book-button" 
+                                    data-user="${username}"
+                                    data-section="reading"
+                                >                                
+                                Reading
+                            </button>
+                        </div>
+                    </div>`)
+            })
+            onclickAddBookToSection()
         })
+                // onclickGetBooks()
+
+}
+
+function onclickAddBookToSection(){
+    const keys = Array.from(document.querySelectorAll('.add-book-button'))
+
+    keys.forEach(key => key.addEventListener('click', function(element){
+        addToSection(key.dataset.isbn, key.dataset.section, key.dataset.user)
+    }))
 }
 
 function getUserDataBySection(section) {
     let username = document.getElementById('login-input').value
-    // let sectionISBNs = [];
     fetch(`/api/list/${section}`, {
             method: "GET",
             headers: {
@@ -71,37 +97,36 @@ function getUserDataBySection(section) {
                 fetchTitleAndImage(books, arrISBNs, section, username)
             })
         })
-
-    // .then((sectionBooks) => {
-    //     sectionISBNs = sectionBooks.map(b => b.isbn);
-    //     return sectionISBNs;
-    // })
-    // .then(() => {
-    //     return getBooks()
-    // })
-    // .then(allBooks => {
-    //     fetchTitleAndImage(allBooks, sectionISBNs, section, username)
-    // })
 }
 
 function fetchTitleAndImage(books, booksArr, section, username) {
     $(`.bookstore-${section}-section`).remove()
-    // $(`.section-header`).remove()
-    // $('.bookstore-section-books').append(`<h3 class='section-header'>${section}</h3>`)
-    // let sectionBooks = books.filter(book => booksArr.includes(book.isbn))
-    // let sectionBooksHTML = sectionBooks.map(book => )
-    for (let i = 0; i < books.length; i++) {
-        if (booksArr.includes(books[i].isbn)) {
-            $(`.bookstore-${section}-books`).append(
-                `<div class="bookstore-${section}-section" >
-                    <img src="${books[i].cover}">
-                    <p>${books[i].title}</p>
-                    <button onclick='deleteBookFromSection("${section}","${books[i].isbn}","${username}")' >
-                        Delete
-                    </button>
-                </div>`)
-        }
-    }
+    let sectionBooks = books.filter(book => booksArr.includes(book.isbn))
+
+    sectionBooks.map(book =>{
+        $(`.bookstore-${section}-books`).append(
+            `<div class="bookstore-${section}-section" >
+                <img src="${book.cover}">
+                <p>${book.title}</p>
+                <button id="button-delete-${book.isbn}" 
+                        data-isbn="${book.isbn}" 
+                        class="delete-book-button" 
+                        data-user="${username}"
+                        data-section="${section}" 
+                    >
+                    Delete
+                </button>
+            </div>`)
+    })
+    onclickDeleteBookFromSection()
+}
+
+function onclickDeleteBookFromSection(){
+    const keys = Array.from(document.querySelectorAll('.delete-book-button'))
+
+    keys.forEach(key => key.addEventListener('click', function(element){
+        deleteBookFromSection( key.dataset.section,key.dataset.isbn, key.dataset.user)
+    }))
 }
 
 function deleteBookFromSection(section, bookIsbn, username) {
@@ -111,10 +136,8 @@ function deleteBookFromSection(section, bookIsbn, username) {
                 "referrer": username,
             }
         })
-        .then(response => response.json()).then(() => {
-            onclickGetBooks()
-            // alert(` book deleted from ${section} section succesfully`)
-        })
+        .then(response => response.json())
+        onclickGetBooks()
 }
 
 
@@ -122,8 +145,6 @@ function addToSection(bookIsbn, section, username) {
     let isbnObj = {
         isbn: bookIsbn
     }
-
-
         let arr = ['want_to_read', 'read', 'reading']
         for (let i = 0; i < arr.length; i++) {
             if(arr[i] === section){
@@ -134,13 +155,6 @@ function addToSection(bookIsbn, section, username) {
                         "referrer": username,
                     },
                     body: JSON.stringify(isbnObj)
-                }).then(response => {
-                    if (response.status === 400) {
-                        // alert(` book already Exists`)
-                    } else {
-                        onclickGetBooks()
-                        // alert(` book add to ${section} section succesfully`)
-                    }
                 })
             }
             else{
@@ -149,28 +163,10 @@ function addToSection(bookIsbn, section, username) {
                     headers: {
                         "referrer": username,
                     }
-                }).then(response => {
-                    if (response.status === 400) {
-                        // alert(` book already Exists`)
-                    } else {
-                        onclickGetBooks()
-                        // alert(` book add to ${section} section succesfully`)
-                    }
                 })
             }
-        }
-    fetch(`/api/list/${section}/${bookIsbn}`, {
-            method: "DELETE",
-            headers: {
-                "referrer": username,
-            }
-        })
-        .then(response => response.json()).then(() => {
             onclickGetBooks()
-            // alert(` book deleted from ${section} section succesfully`)
-        })
-
-
+        }
 }
 
 function getBooks() {
@@ -195,13 +191,13 @@ function onRegisterCreateNewUser() {
         .then(response => {
             if (response.status === 400) {
                 alert('Invalid username')
-            } else {
-                response.json()
+            }else if(response.status===409){
+                alert('Username already exits, Please login')
             }
-        })
-        .then(_ => {
-            onclickGetBooks()
-            getBooksData()
+             else {
+                onclickGetBooks()
+                getBooksData()
+            }
         })
 }
 
