@@ -1,12 +1,5 @@
 let booksData = null
-fetch('/api/books', {
-    method: 'GET'
-}).then((response) => {
-    return response.json()
-}).then(books => {
-    booksData = books
-})
-
+let username = null
 function showDiv() {
     document.getElementById('bookstore-section-books-id').style.visibility = "visible";
     document.getElementById('bookstore-login').style.display = "none";
@@ -40,16 +33,17 @@ function onRegisterCreateNewUser() {
 
 function displayBooks() {
     let username = document.getElementById('login-input').value
-    fetch(`/api/books`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "referrer": username,
-            },
-        }).then((response) => {
+    return fetch('/api/books', {
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json",
+            "referrer": username,
+        },
+    }).then((response) => {
             return response.json()
         })
         .then(books => {
+            booksData =books
             showDiv() //Displays Hidden files after verification is done
             books.forEach(book => {
                 $('.bookstore-books').append(
@@ -92,18 +86,17 @@ function onclickAddBookToSection() {
     const keys = Array.from(document.querySelectorAll('.add-book-button'))
 
     keys.forEach(key => key.addEventListener('click', function () {
-        addToSection(key.dataset.isbn, key.dataset.section, key.dataset.user,$(this))
+        addToSection(key.dataset.isbn, key.dataset.section,$(this))
     }))
 }
 
-function addToSectionDivFunc(isbn, section, username) {
+function addToSectionDivFunc(isbn, section) {
     let sectionBooks = booksData.filter(book => book.isbn === isbn)
-    let sectionHTMLArr = getHTMLToAppend(sectionBooks,section,username)
+    let sectionHTMLArr = getHTMLToAppend(sectionBooks,section)
     $(`.bookstore-${section}-books`).append(sectionHTMLArr.join(""))
 }
 
-
-function addToSection(bookIsbn, section, username,element) {
+function addToSection(bookIsbn, section,element) {
     let isbnObj = {
         isbn: bookIsbn
     }
@@ -127,7 +120,6 @@ function addToSection(bookIsbn, section, username,element) {
                     "referrer": username,
                 }
             }).then(()=>{
-
                 $(`.bookstore-${arr[i]}-books`).children(`.bookstore-${arr[i]}-section`).children(`#button-delete-${element[0].dataset.isbn}`).parent().remove()
             })
         }
@@ -143,7 +135,7 @@ function onclickDeleteBookFromSection() {
     }))
 }
 
-function deleteBookFromSection(section, bookIsbn, username, element) {
+function deleteBookFromSection(section, bookIsbn, element) {
     fetch(`/api/list/${section}/${bookIsbn}`, {
             method: "DELETE",
             headers: {
@@ -158,6 +150,7 @@ function deleteBookFromSection(section, bookIsbn, username, element) {
 
 
 async function onclickGetBooks() {
+    let booksFun = await displayBooks()
     let want_to_read = await getUserDataBySection("want_to_read")
     let read = await getUserDataBySection("read")
     let reading = await getUserDataBySection("reading")
@@ -166,7 +159,7 @@ async function onclickGetBooks() {
 
 function getUserDataBySection(section) {
     let username = document.getElementById('login-input').value
-    fetch(`/api/list/${section}`, {
+    return fetch(`/api/list/${section}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -183,11 +176,11 @@ function getUserDataBySection(section) {
             })
             return arrISBNs
         }).then((arrISBNs) => {
-            fetchTitleAndImage(arrISBNs, section, username)
+            fetchTitleAndImage(arrISBNs, section)
         })
 }
 
-function fetchTitleAndImage(booksArr, section, username) {
+function fetchTitleAndImage(booksArr, section) {
     $(`.bookstore-${section}-section`).remove()
     let sectionBooks = booksData.filter(book => booksArr.includes(book.isbn))
 
@@ -197,7 +190,7 @@ function fetchTitleAndImage(booksArr, section, username) {
     onclickDeleteBookFromSection()
 }
 
-function getHTMLToAppend(sectionBooks, section, username) {
+function getHTMLToAppend(sectionBooks, section) {
     let sectionHTMLArr = sectionBooks.map(book => {
         return `<div class="bookstore-${section}-section" >
             <img src="${book.cover}">
