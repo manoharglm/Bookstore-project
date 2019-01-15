@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const Users = require('./users')
+
 const booksSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -19,9 +21,15 @@ const booksSchema = new mongoose.Schema({
 })
 const Book = module.exports = mongoose.model('book', booksSchema)
 
-module.exports.getBooks = () => {
+module.exports.getBooks = (user) => {
     return new Promise((resolve) =>{
-        Book.find({}).then(data =>{
+        Users.find({
+            userName:user
+        }).then((data)=>{
+            return data
+        }).then(()=>{
+            return Book.find({})
+        }).then(data =>{
             resolve(data) 
         })
     })

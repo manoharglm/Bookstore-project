@@ -1,12 +1,11 @@
 const express = require('express')
 const mongoose = require('mongoose')
-let Books = require('./models/books')
-let Users = require('./models/users')
-let path = require('path')
+const Books = require('./models/books')
+const Users = require('./models/users')
+const path = require('path')
 const Joi = require('joi')
-
-const app = express()
 const bodyParser = require('body-parser')
+const app = express()
 
 app.use(bodyParser.json())
 
@@ -30,7 +29,6 @@ app.use('/api/list', function (req, res, next) {
     } else res.status(400).send(JSON.stringify(`Invalid username ${req.get('Referer')}`))
 })
 
-
 app.use('/api/register', function (req, res, next) {
     let validation = Joi.validate({
         username: req.body.userName
@@ -40,10 +38,9 @@ app.use('/api/register', function (req, res, next) {
     } else res.status(400).send(JSON.stringify(`Invalid username ${req.get('Referer')}`))
 })
 
-
 //Display books
 app.get('/api/books', (req, res) => {
-    Books.getBooks().then(data => {
+    Books.getBooks(req.get('Referer')).then(data => {
         res.status(200).json(data)
     })
 })
@@ -97,5 +94,6 @@ app.delete('/api/list/:section/:isbn', (req, res) => {
         res.status(200).send(data)
     }).catch(err => res.status(400).send(err))
 })
+
 app.use(express.static(path.join(__dirname, '../client')))
 app.listen(3000)
