@@ -1,14 +1,8 @@
 let username = null
 let booksData = null
-fetch('/api/books', {
-    method: 'GET'
-}).then((response) => {
-    return response.json()
-}).then(books => {
-    booksData = books
-})
 
 async function onclickGetBooks() {
+    let showBooks = await displayBooks()
     let want_to_read = await getUserDataBySection("want_to_read")
     let read = await getUserDataBySection("read")
     let reading = await getUserDataBySection("reading")
@@ -18,63 +12,137 @@ function showDiv() {
     document.getElementById('bookstore-login').style.display = "none";
     document.getElementById('user-data').style.display = "block";
     document.body.style.overflowY = "unset";
+    document.body.style.backgroundImage = 'url(./resources/bg.jpg)'
 }
 
-function displayBooks(username) {
+function onRegisterCreateNewUser() {
+    let userObj = {
+        userName: document.getElementById('login-input').value
+    }
+    fetch(`/api/register`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userObj)
+        })
+        .then(response => {
+            if (response.status === 400) {
+                alert('Invalid username')
+            } else if (response.status === 409) {
+                alert('Username already exits, Please login')
+            } else {
+                onclickGetBooks()
+            }
+        })
+}
+
+function displayBooks() {
+    username = document.getElementById('login-input').value
     fetch('/api/books', {
-            method: 'GET'
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+                "referrer": username,
+            },
         }).then((response) => {
             return response.json()
         })
         .then(books => {
-            showDiv() //Displays Hidden files after verification is done
-            let HTMLArr = HTMLToAppendBooks(books,username)
+            booksData = books
+            showDiv() //Displays Hidden content after verification is done
+            let HTMLArr = HTMLToAppendBooks(books, username)
             $('.bookstore-books').append(HTMLArr.join(""))
-            onclickAddBookToSection()
+            makeAddButtonWork()
         })
 }
 
-function HTMLToAppendBooks(books,username){
+function HTMLToAppendBooks(books, username) {
     let HTMLArr = books.map(book => {
-            return  `<div>
-                <img src="${book.cover}">
-                <p>${book.title}</p>
-                <div class="bookstore-section-select">
-                    <button id="button-want_to_read-${book.isbn}" 
-                            class="add-book-button" 
-                            data-isbn="${book.isbn}" 
-                            data-user="${username}" 
-                            data-section="want_to_read" 
-                        >
-                        want to read
-                    </button>
-                    <button id="button-read-${book.isbn}" 
-                            data-isbn="${book.isbn}" 
-                            class="add-book-button" 
-                            data-user="${username}" 
-                            data-section="read" 
-                        >                                
-                        Read
-                    </button>
-                    <button id="button-reading-${book.isbn}" 
-                            data-isbn="${book.isbn}" 
-                            class="add-book-button" 
-                            data-user="${username}"
-                            data-section="reading"
-                        >                                
-                        Reading
-                    </button>
-                </div>
-                </div>`})
+        return `<div>
+                    <img src="${book.cover}">
+                    <p>${book.title}</p>
+                    <div class="bookstore-section-select">
+                        <button id="button-want_to_read-${book.isbn}" 
+                                class="add-book-button" 
+                                data-isbn="${book.isbn}" 
+                                data-user="${username}" 
+                                data-section="want_to_read" 
+                            >
+                            want to read
+                        </button>
+                        <button id="button-read-${book.isbn}" 
+                                data-isbn="${book.isbn}" 
+                                class="add-book-button" 
+                                data-user="${username}" 
+                                data-section="read" 
+                            >                                
+                            Read
+                        </button>
+                        <button id="button-reading-${book.isbn}" 
+                                data-isbn="${book.isbn}" 
+                                class="add-book-button" 
+                                data-user="${username}"
+                                data-section="reading"
+                            >                                
+                            Reading
+                        </button>
+                    </div>
+                </div>`
+    })
     return HTMLArr
-  
 }
 
-function onclickAddBookToSection() {
+function makeAddButtonWork() {
     const keys = Array.from(document.querySelectorAll('.add-book-button'))
     keys.forEach(key => key.addEventListener('click', function (element) {
-        addToSection(key.dataset.isbn, key.dataset.section, key.dataset.user,$(this))
+        addToSection(key.dataset.isbn, key.dataset.section, key.dataset.user, $(this))
     }))
+}
+
+function addToSection(bookIsbn, section, username, element) {
+    let isbnObj = {
+        isbn: bookIsbn
+    }
+    let arr = ['want_to_read', 'read', 'reading']
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i] === section) {
+            fetch(`/api/list/${section}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "referrer": username,
+                },
+                body: JSON.stringify(isbnObj)
+            }).then((res) => {
+                if (res.status === 200) {
+                    onclickAddBook(element[0].dataset.isbn, element[0].dataset.section, element[0].dataset.user)
+                }
+            })
+        } else {
+            fetch(`/api/list/${arr[i]}/${bookIsbn}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "referrer": username,
+                }
+            }).then((res) => {
+                if (res.status === 200) {
+                    $(`.bookstore-${arr[i]}-books`)
+                        .children(`.bookstore-${arr[i]}-section`)
+                        .children(`#button-delete-${element[0].dataset.isbn}`)
+                        .parent().remove()
+                }
+            })
+        }
+    }
+}
+
+function onclickAddBook(isbn, section, username) {
+    let sectionBooks = booksData.filter(book => book.isbn === isbn)
+    let sectionHTMLArr = getHTMLToAppendBooksInSection(sectionBooks, section, username)
+    $(`.bookstore-${section}-books`).append(sectionHTMLArr.join(''))
+    makeDeleteButtonWork()
 }
 
 function getUserDataBySection(section) {
@@ -105,10 +173,10 @@ function fetchTitleAndImage(booksArr, section, username) {
     let sectionBooks = booksData.filter(book => booksArr.includes(book.isbn))
     let sectionHTMLArr = getHTMLToAppendBooksInSection(sectionBooks, section, username)
     $(`.bookstore-${section}-books`).append(sectionHTMLArr.join(""))
-    onclickDeleteBookFromSection()
+    makeDeleteButtonWork()
 }
 
-function getHTMLToAppendBooksInSection(sectionBooks, section,username) {
+function getHTMLToAppendBooksInSection(sectionBooks, section, username) {
     let sectionHTMLArr = sectionBooks.map(book => {
         return `<div class="bookstore-${section}-section" >
             <img src="${book.cover}">
@@ -126,108 +194,24 @@ function getHTMLToAppendBooksInSection(sectionBooks, section,username) {
     return sectionHTMLArr
 }
 
-function onclickDeleteBookFromSection() {
+function makeDeleteButtonWork() {
     const keys = Array.from(document.querySelectorAll('.delete-book-button'))
     keys.forEach(key => key.addEventListener('click', function () {
-        deleteBookFromSection(key.dataset.section, key.dataset.isbn, key.dataset.user,$(this))
+        deleteBookFromSection(key.dataset.section, key.dataset.isbn, key.dataset.user, $(this))
     }))
 }
 
-function deleteBookFromSection(section, bookIsbn, username,element) {
+function deleteBookFromSection(section, bookIsbn, username, element) {
     fetch(`/api/list/${section}/${bookIsbn}`, {
             method: "DELETE",
             headers: {
+                "Content-Type": "application/json",
                 "referrer": username,
             }
         })
-        .then(res =>{
-            if(res.status === 200){
+        .then(res => {
+            if (res.status === 200) {
                 element.parent().remove()
-            }
-        })
-}
-
-function addToSectionDiv(isbn, section,username) {
-    let sectionBooks = booksData.filter(book => book.isbn === isbn)
-    let sectionHTMLArr = getHTMLToAppendBooksInSection(sectionBooks,section,username)
-    $(`.bookstore-${section}-books`).append(sectionHTMLArr.join(''))
-    onclickDeleteBookFromSection()
-}
-
-function addToSection(bookIsbn, section, username,element) {
-    let isbnObj = {
-        isbn: bookIsbn
-    }
-    let arr = ['want_to_read', 'read', 'reading']
-    for (let i = 0; i < arr.length; i++) {
-        if (arr[i] === section) {
-            fetch(`/api/list/${section}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "referrer": username,
-                },
-                body: JSON.stringify(isbnObj)
-            }).then((res) => {
-                if(res.status ===200){
-                    addToSectionDiv(element[0].dataset.isbn, element[0].dataset.section,username)
-                }
-            })
-        } else {
-            fetch(`/api/list/${arr[i]}/${bookIsbn}`, {
-                method: "DELETE",
-                headers: {
-                    "referrer": username,
-                }
-            }).then((res) => {
-                if(res.status === 200){
-                    $(`.bookstore-${arr[i]}-books`)
-                    .children(`.bookstore-${arr[i]}-section`)
-                    .children(`#button-delete-${element[0].dataset.isbn}`)
-                    .parent().remove()
-                }
-            })
-        }
-    }
-}
-
-function onRegisterCreateNewUser() {
-    let userObj = {
-        userName: document.getElementById('login-input').value
-    }
-    fetch(`/api/register`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(userObj)
-        })
-        .then(response => {
-            if (response.status === 400) {
-                alert('Invalid username')
-            } else if (response.status === 409) {
-                alert('Username already exits, Please login')
-            } else {
-                onclickGetBooks()
-                getBooksData()
-            }
-        })
-}
-
-function getBooksData() {
-    let username = document.getElementById('login-input').value
-    fetch(`/api/list/read`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "referrer": username,
-            },
-        })
-        .then(response => {
-            if (response.status !== 200) {
-                alert('Invalid Username')
-            } else {
-                displayBooks(username)
             }
         })
 }
@@ -241,17 +225,18 @@ function fuseSearch() {
     }
     let fuse = new Fuse(booksData, options)
     let result = fuse.search(searchText)
-    let HTMLArr = HTMLToAppendBooks(result,username)
+    let HTMLArr = HTMLToAppendBooks(result, username)
     $(`.bookstore-search-result`).append(HTMLArr.join(''))
-    onclickAddBookToSection()
-
+    makeAddButtonWork()
 }
-function onclickLogout(){
-    document.getElementById('bookstore-login').style.display = "block";
-    document.getElementById('user-data').style.display = "none";
+
+function onclickLogout() {
+    document.getElementById('bookstore-login').style.display = "block"
+    document.getElementById('user-data').style.display = "none"
     document.body.style.overflowY = "hidden";
     $('.bookstore-want_to_read-books').empty()
     $('.bookstore-read-books').empty()
     $('.bookstore-reading-books').empty()
     $('.bookstore-books').empty()
+    document.getElementById('login-input').value = ''
 }

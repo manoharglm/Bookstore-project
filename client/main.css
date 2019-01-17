@@ -7,17 +7,18 @@ body {
     padding: 0;
     border: 0;
     margin: 0;
-    background-image: url(./resources/bg.jpg);
+    background-image: url(./resources/marauders-map.gif);
     background-color: rgba(0, 0, 0, 0.4);
     background-repeat: no-repeat;
     background-size: cover;
-    background-position: center;
+    background-position: center top;
     background-attachment: fixed;
     height: 100%;
     width: auto;
     overflow-y: hidden;
-    background-blend-mode: color;
+    background-blend-mode: darken;
     position: relative;
+    filter: blur(0.9);
 }
 #user-data{
     display: none;
@@ -36,7 +37,6 @@ body {
     font-size: 2em;
     font-weight: 500;
     font-family: 'Lobster', cursive;
-    /* padding: 50% 0%; */
 }
 .bookstore-books{
     display: grid;
@@ -133,3 +133,6 @@ button {
     opacity: 0.8;
     margin: 1% 0%;
 }
+/* #search-input:focus  body{
+    background-color: rgba(0, 0, 0, 0.4);
+} */

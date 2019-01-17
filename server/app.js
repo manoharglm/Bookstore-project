@@ -23,16 +23,16 @@ mongoose.connect('mongodb://localhost/books_project_manohar', {
 //Middleware function for Joi Validation
 app.use('/api/list', function (req, res, next) {
     let validation = Joi.validate({
-        username: req.get('Referer')
+        username: req.get('Referrer')
     }, joiSchema)
     if (validation.error === null) {
         next()
-    } else res.status(400).send(JSON.stringify(`Invalid username ${req.get('Referer')}`))
+    } else res.status(400).send(JSON.stringify(`Invalid username ${req.get('Referrer')}`))
 })
 
 //Display books
 app.get('/api/books', (req, res) => {
-    Books.getBooks().then(data => {
+    Books.getBooks(req.get('Referrer')).then(data => {
         res.status(200).json(data)
     })
 })
@@ -65,19 +65,20 @@ app.post('/api/register', (req, res) => {
 
 //display the books belong to the section want-to-read, read, reading
 app.get('/api/list/:section', (req, res) => {
-    Users.displayBooks(req.get('Referer'), req.params.section).then(data => {
+    Users.displayBooks(req.get('Referrer'), req.params.section).then(data => {
         res.status(200).send(data)
     }).catch((err) => {
         res.status(400).send(err)
     })
 })
+
 //add books to chosen section
 app.post('/api/list/:section', (req, res) => {
     let obj = req.body
     if (Users.joiValidationIsbn(obj.isbn).error === null) {
-        Users.validatingRequest(req.get('Referer'), obj.isbn, req.params.section)
+        Users.validatingRequest(req.get('Referrer'), obj.isbn, req.params.section)
             .then(() => {
-                return Users.addBook(req.get('Referer'), obj.isbn, req.params.section)
+                return Users.addBook(req.get('Referrer'), obj.isbn, req.params.section)
             })
             .then(books => {
                 res.status(200).send(books)
@@ -89,7 +90,7 @@ app.post('/api/list/:section', (req, res) => {
 })
 //delete book from chosen section
 app.delete('/api/list/:section/:isbn', (req, res) => {
-    Users.deleteBook(req.get('Referer'), req.params.isbn, req.params.section).then(data => {
+    Users.deleteBook(req.get('Referrer'), req.params.isbn, req.params.section).then(data => {
         res.status(200).send(data)
     }).catch(err => res.status(400).send(err))
 })

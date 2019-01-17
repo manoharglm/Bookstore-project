@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-let Book = require('./books.js')
 const Joi = require('joi')
 
 const userSchema = new mongoose.Schema({
@@ -62,53 +61,13 @@ function checkInCurrentSectionToAdd(user, section, bookIsbn) {
     })
 }
 
-// function checkInOtherSectionToRemove(user, section, bookIsbn) {
-//     let arr = ['want_to_read', 'read', 'reading']
-//     for (let i = 0; i < arr.length; i++) {
-//         if(arr[i] === section) continue
-//         else{
-//             console.log(arr[i])
-
-//             return User.findOne({
-//                 userName: user
-//             }, arr[i]).then(bookData => {
-//                 let verResult = bookData[arr[i]].some(obj => obj.isbn === bookIsbn)
-//                 if(verResult){
-//                     User.findOneAndUpdate({
-//                         userName: user
-//                     }, {
-//                         $pull: {
-//                             [section]: {
-//                                 isbn: bookIsbn
-//                             }
-//                         }
-//                     }, {
-//                         new: true
-//                     })
-//                 }
-//             })
-//         }
-//     }
-// }
-// module.exports.checkInOtherSectionToRemove = checkInOtherSectionToRemove
-
 function validatingRequest(user, bookIsbn, section) {
     return new Promise((resolve, reject) => {
-        Book.findOne({
-            isbn: bookIsbn
-        }).then(data => {
-            if (data !== null) {
-                checkInCurrentSectionToAdd(user, section, bookIsbn).then(result => {
-                    if (!result) {
-                        resolve(bookIsbn)
-                    } else {
-                        reject('Book Already Exists')
-                    }
-
-                })
-
+        checkInCurrentSectionToAdd(user, section, bookIsbn).then(result => {
+            if (!result) {
+                resolve(bookIsbn)
             } else {
-                reject('Invalid Book')
+                reject('Book Already Exists')
             }
         })
     })
@@ -127,7 +86,9 @@ module.exports.addBook = (user, bookIsbn, section) => {
             }
         }).then(data => {
             resolve(data)
-        }).catch(err => reject(err))
+        }).catch(err => {
+            reject(err)
+        })
     })
 }
 
