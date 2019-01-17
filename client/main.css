@@ -17,8 +17,11 @@ body {
     width: auto;
     overflow-y: hidden;
     background-blend-mode: color;
+    position: relative;
 }
-
+#user-data{
+    display: none;
+}
 .bookstore-title {
     text-align: center;
     top: 0;
@@ -29,14 +32,12 @@ body {
     color: #fdea2c;
     text-decoration: none;
 }
-
 .bookstore-title span {
     font-size: 2em;
     font-weight: 500;
     font-family: 'Lobster', cursive;
-    padding: 50% 0%;
+    /* padding: 50% 0%; */
 }
-
 .bookstore-books{
     display: grid;
     grid-template-columns: auto auto auto;
@@ -51,7 +52,9 @@ body {
     flex-direction: column;
     align-items: center;
 }
-
+.bookstore-search-result{
+    margin-top: 2%;
+}
 .bookstore-search-result img,.bookstore img{
     width: 150px;
     height: 200px;
@@ -59,30 +62,43 @@ body {
     background-color: white;
     border-radius: 4%;
 }
-.bookstore-books p {
-    text-align: center;
+/* .bookstore-books p,
+.bookstore-want_to_read-section p,
+.bookstore-read-section p,
+.bookstore-reading-section p{ */
+p{
+    /* text-align: center; */
+    color: antiquewhite;
+    font-weight: bold;
 }
-
+button {
+    background-color: rgba(249,19,19, 0.6);
+    border: none;
+    text-align: center;
+    color: #fdea2c;
+}
 .bookstore {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-column-gap: 100px;
 }
 .bookstore-section-books {
-    visibility: hidden;
     margin-top: 5%;
 }
-
-#bookstore-logout-search {
-    visibility: hidden;
-
-}
-
 #bookstore-login {
     display: block;
-    display: flex;
-    justify-content: center;
+    /* display: flex;
+    justify-content: center; */
+    position: absolute;
+    left: 30%;
     margin-top: 10%;
+}
+#bookstore-login input{
+    width: 500px;
+    height: 30px;
+}
+#bookstore-login button{
+    height: 30px;
 }
 
 #bookstore-logout-search {
@@ -92,18 +108,7 @@ body {
     margin-top: 2%;
 }
 
-#bookstore-logout-search button,
-#bookstore-login button {
-    background-color: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(0, 0, 0, 0.4);
-}
-
-#bookstore-login input {
-    height: 2.5em;
-    width: 50%;
-}
-
-#bookstore-logout-search input {
+#bookstore-logout-search input{
     height: 2.5em;
     width: 50%;
 }

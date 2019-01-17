@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -13,46 +12,42 @@
     <link rel="icon" href="resources/gryffindor.jpg">
     <link rel="stylesheet" href="">
     <script src="main.js"></script>
-
-
 </head>
 
 <body>
-    <!-- <img class="backgroung-image" src="./resources/bg.jpg"> -->
-    <!-- <div class="bookstore"> -->
     <div class="bookstore-title">
-        <a href="#"><span >BookHub</span></a>
+        <a href="#"><span>BookHub</span></a>
     </div>
     <form id='bookstore-login' onsubmit="return false">
         <input type="text" id="login-input">
         <button class="bookstore-login-button" onclick="onclickGetBooks();getBooksData();">Login</button>
         <button class="bookstore-register-button" onclick="onRegisterCreateNewUser();">Register</button>
     </form>
-    <form id='bookstore-logout-search' onsubmit="return false">
-        <input type="search" onkeyup="fuseSearch()" id="search-input">
-        <!-- <button onclick="fuseSearch();">Search</button> -->
-        <button class="bookstore-logout-button" onclick="window.location.reload()">Logout</button>
-    </form>
-    <div class="bookstore-search-result">
+    <div id="user-data">
+        <form id='bookstore-logout-search' onsubmit="return false">
+            <input type="search" onkeyup="fuseSearch()" id="search-input">
+            <!-- <button onclick="fuseSearch();">Search</button> -->
+            <button class="bookstore-logout-button" onclick="onclickLogout()">Logout</button>
+        </form>
+        <div class="bookstore-search-result">
 
-    </div>
-    <div class="bookstore">
-        <div class="bookstore-books">
         </div>
-        <div class="bookstore-section-books" id="bookstore-section-books-id">
-            <div class="section-header"><span>Want to read</span></div>
-            <div class="bookstore-want_to_read-books">
+        <div class="bookstore" id="bookstore">
+            <div class="bookstore-books">
             </div>
-            <div class="section-header"><span>Read</span></div>
-            <div class="bookstore-read-books">
-            </div>
-            <div class="section-header"><span>Reading</span></div>
-            <div class="bookstore-reading-books">
+            <div class="bookstore-section-books" id="bookstore-section-books-id">
+                <div class="section-header"><span>Want to read</span></div>
+                <div class="bookstore-want_to_read-books">
+                </div>
+                <div class="section-header"><span>Read</span></div>
+                <div class="bookstore-read-books">
+                </div>
+                <div class="section-header"><span>Reading</span></div>
+                <div class="bookstore-reading-books">
+                </div>
             </div>
         </div>
     </div>
-    <!-- </div> -->
-
 </body>
 
 </html>

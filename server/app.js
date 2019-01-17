@@ -30,17 +30,6 @@ app.use('/api/list', function (req, res, next) {
     } else res.status(400).send(JSON.stringify(`Invalid username ${req.get('Referer')}`))
 })
 
-
-app.use('/api/register', function (req, res, next) {
-    let validation = Joi.validate({
-        username: req.body.userName
-    }, joiSchema)
-    if (validation.error === null) {
-        next()
-    } else res.status(400).send(JSON.stringify(`Invalid username ${req.get('Referer')}`))
-})
-
-
 //Display books
 app.get('/api/books', (req, res) => {
     Books.getBooks().then(data => {
@@ -58,13 +47,20 @@ app.get('/api/books/:_id', (req, res) => {
 //validate and add new user
 app.post('/api/register', (req, res) => {
     let user = req.body
-    Users.validateUser(user.userName).then(() => {
-        return Users.addUser(user.userName)
-    }).then(result => {
-        res.status(201).send(result)
-    }).catch((err) => {
-        res.status(409).send(err)
-    })
+    let validation = Joi.validate({
+        username: req.body.userName
+    }, joiSchema)
+    if (validation.error === null) {
+        Users.validateUser(user.userName).then(() => {
+            return Users.addUser(user.userName)
+        }).then(result => {
+            res.status(201).send(result)
+        }).catch((err) => {
+            res.status(409).send(err)
+        })
+    }else{
+        res.status(400).send('Invalid Username')
+    }
 })
 
 //display the books belong to the section want-to-read, read, reading
